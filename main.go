@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/gin-gonic/gin"
@@ -51,7 +52,6 @@ func getAllRates() ([]Rate, error) {
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("rateByDate %v", err)
 	}
-	fmt.Printf("Rates found: %v\n", rates)
 	return rates, nil
 }
 
@@ -87,7 +87,7 @@ func rateByDate(date string) ([]Rate, error) {
 	return rates, nil
 }
 
-// albumByID queries for the album with the specified ID.
+// rateByID queries for the daily rate with the specified ID.
 func rateByID(id int64) (Rate, error) {
 	// A rate to hold data from the returned row.
 	var rate Rate
@@ -100,6 +100,25 @@ func rateByID(id int64) (Rate, error) {
 		return rate, fmt.Errorf("rateById %d: %v", id, err)
 	}
 	return rate, nil
+}
+
+func getRateByID(c *gin.Context) {
+	string_id := c.Param("id")
+	var rate Rate
+
+	id, err := strconv.ParseInt(string_id, 10, 64)
+	if err != nil {
+		fmt.Println("Error converting string to int64:", err)
+		return
+	} else {
+		fmt.Println("id is %d",  id)
+	}
+
+	rate, err2 := rateByID(id)
+	if err2 != nil {
+		return
+	}
+	c.IndentedJSON(http.StatusOK, rate)
 }
 
 // addAlbum adds the specified album to the database,
@@ -161,6 +180,7 @@ func main() {
 
 	router := gin.Default()
 	router.GET("/rates", rateGetAll)
+	router.GET("/rates/:id", getRateByID)
 	router.Run("localhost:8080")
 
 //	alb, err := albumByID(2)
