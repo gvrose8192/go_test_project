@@ -33,6 +33,7 @@ type Rate struct {
 	thirty_year	float32
 }
 
+// Pull all records from the database
 func getAllRates() ([]Rate, error) {
 	var rates []Rate
 
@@ -58,6 +59,7 @@ func getAllRates() ([]Rate, error) {
 func rateGetAll(c *gin.Context) {
 	var rates []Rate
 
+	// Get everything - queries can pick and choose later
 	rates, err := getAllRates()
 	if err != nil {
 		return
@@ -106,18 +108,18 @@ func getRateByID(c *gin.Context) {
 	string_id := c.Param("id")
 	var rate Rate
 
+	// Get the id
 	id, err := strconv.ParseInt(string_id, 10, 64)
 	if err != nil {
 		fmt.Println("Error converting string to int64:", err)
 		return
-	} else {
-		fmt.Println("id is %d",  id)
 	}
 
 	rate, err2 := rateByID(id)
 	if err2 != nil {
 		return
 	}
+
 	c.IndentedJSON(http.StatusOK, rate)
 }
 
