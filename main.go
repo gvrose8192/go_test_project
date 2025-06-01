@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"bufio"
+	"os"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/gin-gonic/gin"
@@ -123,6 +126,32 @@ func getRateByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, rate)
 }
 
+func updateRateTable() {
+	currentTime := time.Now()
+	f := currentTime.Format("200601")
+
+	s := fmt.Sprintf("https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/all/202505?type=daily_treasury_yield_curve&field_tdr_date_value_month=%s&page&_format=csv", f)
+
+	resp, err := http.Get(s)
+	if err != nil {
+		panic(err)
+	}
+
+	defer resp.Body.Close()
+
+	scanner := bufio.NewScanner(resp.Body)
+	for scanner.Scan() {
+		line := scanner.Text()
+		fmt.Println(line)
+	}
+
+	if scan_err := scanner.Err(); scan_err != nil {
+		fmt.Println("Error reading request body:", scan_err)
+		return
+	}
+
+}
+
 // addAlbum adds the specified album to the database,
 // returning the album ID of the new entry
 //func addAlbum(alb Album) (int64, error) {
@@ -141,8 +170,15 @@ func main() {
 
 	username := flag.String("username", "your name", "a string")
 	password := flag.String("password", "your password", "a string")
+	db_update := flag.Bool("db-update", false, "Update database")
 
 	flag.Parse()
+
+	if *db_update {
+		updateRateTable()
+	}
+
+	os.Exit(0)
 
 	// Capture connection properties.
 	cfg := mysql.NewConfig()
@@ -163,7 +199,6 @@ func main() {
 	if pingErr != nil {
 		log.Fatal(pingErr)
 	}
-	fmt.Println("Connected!")
 
 	rates, err := rateByDate("2025-22-05")
 
