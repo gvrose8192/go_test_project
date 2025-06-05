@@ -15,8 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var db *sql.DB
-
 type Rate struct {
 	ID		int64
 	Date		string
@@ -35,6 +33,8 @@ type Rate struct {
 	twenty_year	float32
 	thirty_year	float32
 }
+
+var db *sql.DB
 
 // Pull all records from the database
 func getAllRates() ([]Rate, error) {
@@ -142,85 +142,109 @@ func reverseStringArray(arr []string) []string {
 	return arr
 }
 
-func insertNewRate(rateString []string) error {
+func insertNewRate(rateString []string, columns []string) error {
+	var err error = nil
 	newRate := Rate{ID: 0, Date: rateString[0]}
 	fmt.Printf("New Record Date is %s\n", newRate.Date)
 
-	var err error = nil
-	newRate.one_month, err = convertStringToFloat(rateString[1])
-	if err != nil {
-		return err
+	for i := 1; i < len(columns); i = i + 1 {
+		// Sometimes the government changes horses in the middle of the dang stream
+		// See year 2018 for example that this conditional handles
+		if len(rateString[i]) < 2 {
+			continue
+		}
+		switch columns[i] {
+		case "\"1 Mo\"":
+			newRate.one_month, err = convertStringToFloat(rateString[i])
+			if err != nil {
+				fmt.Printf("Conversion error one month %v\n", err)
+				return err
+			}
+		case "\"1.5 month\"":
+			newRate.one_5month, err = convertStringToFloat(rateString[i])
+			if err != nil {
+				fmt.Printf("Conversion error one_5month %v\n", err)
+				return err
+			}
+		case "\"2 Mo\"":
+			newRate.two_month, err = convertStringToFloat(rateString[i])
+			if err != nil {
+				fmt.Printf("Conversion error two month %v\n", err)
+				return err
+			}
+		case "\"3 Mo\"":
+			newRate.three_month, err = convertStringToFloat(rateString[i])
+			if err != nil {
+				fmt.Printf("Conversion error three month%v\n", err)
+				return err
+			}
+		case "\"4 Mo\"":
+			newRate.four_month, err = convertStringToFloat(rateString[i])
+			if err != nil {
+				fmt.Printf("Conversion error four month %v\n", err)
+				return err
+			}
+		case "\"6 Mo\"":
+			newRate.six_month, err = convertStringToFloat(rateString[i])
+			if err != nil {
+				fmt.Printf("Conversion error six month %v\n", err)
+				return err
+			}
+		case "\"1 Yr\"":
+			newRate.one_year, err = convertStringToFloat(rateString[i])
+			if err != nil {
+				fmt.Printf("Conversion error one year %v\n", err)
+				return err
+			}
+		case "\"2 Yr\"":
+			newRate.two_year, err = convertStringToFloat(rateString[i])
+			if err != nil {
+				fmt.Printf("Conversion error two year %v\n", err)
+				return err
+			}
+		case "\"3 Yr\"":
+			newRate.three_year, err = convertStringToFloat(rateString[i])
+			if err != nil {
+				fmt.Printf("Conversion error three year %v\n", err)
+				return err
+			}
+		case "\"5 Yr\"":
+			newRate.five_year, err = convertStringToFloat(rateString[i])
+			if err != nil {
+				fmt.Printf("Conversion error five year %v\n", err)
+				return err
+			}
+		case "\"7 Yr\"":
+			newRate.seven_year, err = convertStringToFloat(rateString[i])
+			if err != nil {
+				fmt.Printf("Conversion error seven year %v\n", err)
+				return err
+			}
+		case "\"10 Yr\"":
+			newRate.ten_year, err = convertStringToFloat(rateString[i])
+			if err != nil {
+				fmt.Printf("Conversion error ten year %v\n", err)
+				return err
+			}
+		case "\"20 Yr\"":
+			newRate.twenty_year, err = convertStringToFloat(rateString[i])
+			if err != nil {
+				fmt.Printf("Conversion error twenty year %v\n", err)
+				return err
+			}
+		case "\"30 Yr\"":
+			newRate.thirty_year, err = convertStringToFloat(rateString[i])
+			if err != nil {
+				fmt.Printf("Conversion error thirty year %v\n", err)
+				return err
+			}
+		}
+
 	}
 
-	newRate.one_5month, err = convertStringToFloat(rateString[2])
-	if err != nil {
-		return err
-	}
-
-	newRate.two_month, err = convertStringToFloat(rateString[3])
-	if err != nil {
-		return err
-	}
-
-	newRate.three_month, err = convertStringToFloat(rateString[4])
-	if err != nil {
-		return err
-	}
-
-	newRate.four_month, err = convertStringToFloat(rateString[5])
-	if err != nil {
-		return err
-	}
-
-	newRate.six_month, err = convertStringToFloat(rateString[6])
-	if err != nil {
-		return err
-	}
-
-	newRate.one_year, err = convertStringToFloat(rateString[7])
-	if err != nil {
-		return err
-	}
-
-	newRate.two_year, err = convertStringToFloat(rateString[8])
-	if err != nil {
-		return err
-	}
-
-	newRate.three_year, err = convertStringToFloat(rateString[9])
-	if err != nil {
-		return err
-	}
-
-	newRate.five_year, err = convertStringToFloat(rateString[10])
-	if err != nil {
-		return err
-	}
-
-	newRate.seven_year, err = convertStringToFloat(rateString[11])
-	if err != nil {
-		return err
-	}
-
-	newRate.ten_year, err = convertStringToFloat(rateString[12])
-	if err != nil {
-		return err
-	}
-
-	newRate.twenty_year, err = convertStringToFloat(rateString[13])
-	if err != nil {
-		return err
-	}
-
-	newRate.thirty_year, err = convertStringToFloat(rateString[14])
-	if err != nil {
-		return err
-	}
-
-
-	fmt.Printf("one month: %f\tone 1/2 month: %f\ttwo month: %f\tthree month: %f\t four_month: %f\n", newRate.one_month, newRate.one_5month, newRate.two_month, newRate.three_month, newRate.four_month)
-	fmt.Printf("six month: %f\tone year: %f\ttwo year: %f\tthree year: %f\tfive year: %f\n", newRate.six_month, newRate.one_year, newRate.two_year, newRate.three_year, newRate.five_year)
-	fmt.Printf("seven year: %f\tten year: %f\ttwenty year: %f\tthirty year: %f\n", newRate.seven_year, newRate.ten_year, newRate.twenty_year, newRate.thirty_year)
+//	fmt.Printf("one month: %f\tone 1/2 month: %f\ttwo month: %f\tthree month: %f\t four_month: %f\n", newRate.one_month, newRate.one_5month, newRate.two_month, newRate.three_month, newRate.four_month)
+//	fmt.Printf("six month: %f\tone year: %f\ttwo year: %f\tthree year: %f\tfive year: %f\n", newRate.six_month, newRate.one_year, newRate.two_year, newRate.three_year, newRate.five_year)
+//	fmt.Printf("seven year: %f\tten year: %f\ttwenty year: %f\tthirty year: %f\n", newRate.seven_year, newRate.ten_year, newRate.twenty_year, newRate.thirty_year)
 
 	result, dberr := db.Exec("INSERT INTO rate(date, one_month, one_5month, two_month, three_month, four_month, six_month, one_year, two_year, three_year, five_year, seven_year, ten_year, twenty_year, thirty_year) 					 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", newRate.Date, newRate.one_month, newRate.one_5month, newRate.two_month, newRate.three_month, newRate.four_month, newRate.six_month, newRate.one_year, newRate.two_year, newRate.three_year, newRate.five_year, newRate.seven_year, newRate.ten_year, newRate.twenty_year, newRate.thirty_year)
 	if dberr != nil {
@@ -247,7 +271,7 @@ func insertNewRate(rateString []string) error {
 	return nil
 }
 
-func addNewRates(rateArray []string) error {
+func addNewRates(rateArray []string, columns []string) error {
 	for i := 0; i < len(rateArray); i = i + 1 {
 		csvElements := strings.Split(rateArray[i], ",")
 		var rates []Rate
@@ -268,11 +292,50 @@ func addNewRates(rateArray []string) error {
 		}
 		rows.Close()
 		if len(rates) == 0 {
-			insertNewRate(csvElements)
+			insertNewRate(csvElements, columns)
 		}
 	}
 
 	return nil
+}
+
+// Base time will be 2015
+func addNewRatesFromBaseTime() {
+	var years = [11]string{"2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"}
+	for i := 0; i < len(years); i = i + 1 {
+		newLines := []string{}
+		s := fmt.Sprintf("https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/%s/all?type=daily_treasury_yield_curve&field_tdr_date_value=%s&page&_format=csv", years[i], years[i])
+//		fmt.Println(s)
+		resp, err := http.Get(s)
+		if err != nil {
+			panic(err)
+		}
+
+		defer resp.Body.Close()
+		scanner := bufio.NewScanner(resp.Body)
+		for scanner.Scan() {
+			line := scanner.Text()
+//			fmt.Println(line)
+			newLines = append(newLines, line)
+		}
+
+		if scan_err := scanner.Err(); scan_err != nil {
+			fmt.Println("Error reading request body:", scan_err)
+			return
+		}
+
+		resp.Body.Close()
+		// The Treasury delivers the CSV lines from highest to lowest date
+		// Reverse that and also drop the first line which is the CVS header fields
+		// Our database 'rate' table already defines those.
+		csvColumns := strings.Split(newLines[0], ",")
+		reversedLines := reverseStringArray(newLines)
+		newRateLines := reversedLines[:len(reversedLines) - 1]
+//		fmt.Println("These are the header columns")
+//		fmt.Println(csvColumns)
+//		fmt.Println(newRateLines[0])
+		addNewRates(newRateLines, csvColumns)
+	}
 }
 
 func updateRateTable() {
@@ -304,9 +367,10 @@ func updateRateTable() {
 	// The Treasury delivers the CSV lines from highest to lowest date
 	// Reverse that and also drop the first line which is the CVS header fields
 	// Our database 'rate' table already defines those.
+	csvColumns := strings.Split(newLines[0], ",")
 	reversedLines := reverseStringArray(newLines)
 	newRateLines := reversedLines[:len(reversedLines) - 1]
-	addNewRates(newRateLines)
+	addNewRates(newRateLines, csvColumns)
 }
 
 func main() {
@@ -314,6 +378,7 @@ func main() {
 	username := flag.String("username", "your name", "a string")
 	password := flag.String("password", "your password", "a string")
 	db_update := flag.Bool("db-update", false, "Update database")
+	db_init := flag.Bool("db-init", false, "Pull in all records since 2015")
 
 	flag.Parse()
 
@@ -339,6 +404,10 @@ func main() {
 
 	if *db_update {
 		updateRateTable()
+	}
+
+	if *db_init {
+		addNewRatesFromBaseTime()
 	}
 
 	router := gin.Default()
