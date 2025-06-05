@@ -160,7 +160,7 @@ func insertNewRate(rateString []string, columns []string) error {
 				fmt.Printf("Conversion error one month %v\n", err)
 				return err
 			}
-		case "\"1.5 month\"":
+		case "\"1.5 Month\"":
 			newRate.one_5month, err = convertStringToFloat(rateString[i])
 			if err != nil {
 				fmt.Printf("Conversion error one_5month %v\n", err)
