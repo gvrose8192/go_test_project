@@ -145,7 +145,7 @@ func reverseStringArray(arr []string) []string {
 func insertNewRate(rateString []string, columns []string) error {
 	var err error = nil
 	newRate := Rate{ID: 0, Date: rateString[0]}
-	fmt.Printf("New Record Date is %s\n", newRate.Date)
+//	fmt.Printf("New Record Date is %s\n", newRate.Date)
 
 	for i := 1; i < len(columns); i = i + 1 {
 		// Sometimes the government changes horses in the middle of the dang stream
@@ -251,14 +251,17 @@ func insertNewRate(rateString []string, columns []string) error {
 		fmt.Printf("insert rate: %v\n", dberr)
 		return dberr
 	}
-	fmt.Println("Insert finished")
+//	fmt.Println("Insert finished")
 
 	rowsAffected, dberr := result.RowsAffected()
 	if dberr != nil {
 		fmt.Printf("insert rate: %v\n", dberr)
 		return dberr
 	}
-	fmt.Printf("Rows Affected: %d\n", rowsAffected)
+	if rowsAffected != 1 {
+		fmt.Println("Rows affected should be one but isn't, instead it is %d\n", rowsAffected)
+	}
+//	fmt.Printf("Rows Affected: %d\n", rowsAffected)
 
 	id, dberr := result.LastInsertId()
 	if dberr != nil {
@@ -266,7 +269,7 @@ func insertNewRate(rateString []string, columns []string) error {
 		return dberr
 	}
 
-	fmt.Printf("Created record with id %d\n", id)
+	fmt.Printf("Created record from date %s with id %d\n", newRate.Date, id)
 
 	return nil
 }
@@ -277,8 +280,8 @@ func addNewRates(rateArray []string, columns []string) error {
 		var rates []Rate
 		var rate Rate
 
-		fmt.Println(csvElements)
-		fmt.Printf("Checking for record with Date: %s\n", csvElements[0])
+//		fmt.Println(csvElements)
+//		fmt.Printf("Checking for record with Date: %s\n", csvElements[0])
 
 		rows, err := db.Query("SELECT * FROM rate WHERE date like ?",  csvElements[0])
 		if err != nil {
