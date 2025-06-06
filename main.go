@@ -329,12 +329,12 @@ func addNewRatesFromBaseTime() {
 
 		resp.Body.Close()
 		// The Treasury delivers the CSV lines from highest to lowest date
-		// Reverse that and also drop the first line which is the CVS header fields
-		// Our database 'rate' table already defines those.
+		// Reverse them and save the first line, which is the CVS header fields
+		// for use in the record insertion, where the header fields change
+		// from year to year and sometimes even in the middle of the year.
 		csvColumns := strings.Split(newLines[0], ",")
 		reversedLines := reverseStringArray(newLines)
 		newRateLines := reversedLines[:len(reversedLines) - 1]
-//		fmt.Println("These are the header columns")
 //		fmt.Println(csvColumns)
 //		fmt.Println(newRateLines[0])
 		addNewRates(newRateLines, csvColumns)
@@ -368,8 +368,9 @@ func updateRateTable() {
 
 
 	// The Treasury delivers the CSV lines from highest to lowest date
-	// Reverse that and also drop the first line which is the CVS header fields
-	// Our database 'rate' table already defines those.
+	// Reverse them and save the first line, which is the CVS header fields
+	// for use in the record insertion, where the header fields change
+	// from year to year and sometimes even in the middle of the year.
 	csvColumns := strings.Split(newLines[0], ",")
 	reversedLines := reverseStringArray(newLines)
 	newRateLines := reversedLines[:len(reversedLines) - 1]
