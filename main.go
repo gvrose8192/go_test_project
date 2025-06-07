@@ -1,37 +1,37 @@
 package main
 
 import (
+	"bufio"
 	"database/sql"
-	"net/http"
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
-	"bufio"
-	"time"
 	"strings"
+	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/gin-gonic/gin"
+	"github.com/go-sql-driver/mysql"
 )
 
 type Rate struct {
-	ID		int64
-	Date		string
-	one_month	float32
-	one_5month	float32
-	two_month	float32
-	three_month	float32
-	four_month	float32
-	six_month	float32
-	one_year	float32
-	two_year	float32
-	three_year	float32
-	five_year	float32
-	seven_year	float32
-	ten_year	float32
-	twenty_year	float32
-	thirty_year	float32
+	ID          int64
+	Date        string
+	one_month   float32
+	one_5month  float32
+	two_month   float32
+	three_month float32
+	four_month  float32
+	six_month   float32
+	one_year    float32
+	two_year    float32
+	three_year  float32
+	five_year   float32
+	seven_year  float32
+	ten_year    float32
+	twenty_year float32
+	thirty_year float32
 }
 
 var db *sql.DB
@@ -42,19 +42,19 @@ func getAllRates() ([]Rate, error) {
 
 	rows, err := db.Query("SELECT * FROM rate")
 	if err != nil {
-		return nil, fmt.Errorf("rateByDate %v", err)
+		return nil, fmt.Errorf("getAllRates %v", err)
 	}
 	defer rows.Close()
 	// Loop through rows, using Scan to assign column data to struct fields.
 	for rows.Next() {
 		var rate Rate
 		if err := rows.Scan(&rate.ID, &rate.Date, &rate.one_month, &rate.one_5month, &rate.two_month, &rate.three_month, &rate.four_month, &rate.six_month, &rate.one_year, &rate.two_year, &rate.three_year, &rate.five_year, &rate.seven_year, &rate.ten_year, &rate.twenty_year, &rate.thirty_year); err != nil {
-			return nil, fmt.Errorf("rateByDate %v", err)
+			return nil, fmt.Errorf("getAllRates %v", err)
 		}
 		rates = append(rates, rate)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rateByDate %v", err)
+		return nil, fmt.Errorf("getAllRates %v", err)
 	}
 	return rates, nil
 }
@@ -92,6 +92,20 @@ func rateByDate(date string) ([]Rate, error) {
 	return rates, nil
 }
 
+func getRateByDate(c *gin.Context) {
+	date_string := c.Param("date")
+	var rates []Rate
+
+	fmt.Printf("Date : %s\n", date_string)
+	fixed_date_string := strings.Replace(date_string, "-", "/", 2)
+
+	rates, err := rateByDate(fixed_date_string)
+	if err != nil {
+		return
+	}
+	c.IndentedJSON(http.StatusOK, rates)
+}
+
 // rateByID queries for the daily rate with the specified ID.
 func rateByID(id int64) (Rate, error) {
 	// A rate to hold data from the returned row.
@@ -114,7 +128,7 @@ func getRateByID(c *gin.Context) {
 	// Get the id
 	id, err := strconv.ParseInt(string_id, 10, 64)
 	if err != nil {
-		fmt.Println("Error converting string to int64:", err)
+		fmt.Printf("Error converting string to int64\n")
 		return
 	}
 
@@ -145,7 +159,7 @@ func reverseStringArray(arr []string) []string {
 func insertNewRate(rateString []string, columns []string) error {
 	var err error = nil
 	newRate := Rate{ID: 0, Date: rateString[0]}
-//	fmt.Printf("New Record Date is %s\n", newRate.Date)
+	//	fmt.Printf("New Record Date is %s\n", newRate.Date)
 
 	for i := 1; i < len(columns); i = i + 1 {
 		// Sometimes the government changes horses in the middle of the dang stream
@@ -242,16 +256,16 @@ func insertNewRate(rateString []string, columns []string) error {
 
 	}
 
-//	fmt.Printf("one month: %f\tone 1/2 month: %f\ttwo month: %f\tthree month: %f\t four_month: %f\n", newRate.one_month, newRate.one_5month, newRate.two_month, newRate.three_month, newRate.four_month)
-//	fmt.Printf("six month: %f\tone year: %f\ttwo year: %f\tthree year: %f\tfive year: %f\n", newRate.six_month, newRate.one_year, newRate.two_year, newRate.three_year, newRate.five_year)
-//	fmt.Printf("seven year: %f\tten year: %f\ttwenty year: %f\tthirty year: %f\n", newRate.seven_year, newRate.ten_year, newRate.twenty_year, newRate.thirty_year)
+	//	fmt.Printf("one month: %f\tone 1/2 month: %f\ttwo month: %f\tthree month: %f\t four_month: %f\n", newRate.one_month, newRate.one_5month, newRate.two_month, newRate.three_month, newRate.four_month)
+	//	fmt.Printf("six month: %f\tone year: %f\ttwo year: %f\tthree year: %f\tfive year: %f\n", newRate.six_month, newRate.one_year, newRate.two_year, newRate.three_year, newRate.five_year)
+	//	fmt.Printf("seven year: %f\tten year: %f\ttwenty year: %f\tthirty year: %f\n", newRate.seven_year, newRate.ten_year, newRate.twenty_year, newRate.thirty_year)
 
 	result, dberr := db.Exec("INSERT INTO rate(date, one_month, one_5month, two_month, three_month, four_month, six_month, one_year, two_year, three_year, five_year, seven_year, ten_year, twenty_year, thirty_year) 					 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", newRate.Date, newRate.one_month, newRate.one_5month, newRate.two_month, newRate.three_month, newRate.four_month, newRate.six_month, newRate.one_year, newRate.two_year, newRate.three_year, newRate.five_year, newRate.seven_year, newRate.ten_year, newRate.twenty_year, newRate.thirty_year)
 	if dberr != nil {
 		fmt.Printf("insert rate: %v\n", dberr)
 		return dberr
 	}
-//	fmt.Println("Insert finished")
+	//	fmt.Println("Insert finished")
 
 	rowsAffected, dberr := result.RowsAffected()
 	if dberr != nil {
@@ -261,7 +275,7 @@ func insertNewRate(rateString []string, columns []string) error {
 	if rowsAffected != 1 {
 		fmt.Println("Rows affected should be one but isn't, instead it is %d\n", rowsAffected)
 	}
-//	fmt.Printf("Rows Affected: %d\n", rowsAffected)
+	//	fmt.Printf("Rows Affected: %d\n", rowsAffected)
 
 	id, dberr := result.LastInsertId()
 	if dberr != nil {
@@ -280,12 +294,12 @@ func addNewRates(rateArray []string, columns []string) error {
 		var rates []Rate
 		var rate Rate
 
-//		fmt.Println(csvElements)
-//		fmt.Printf("Checking for record with Date: %s\n", csvElements[0])
+		//		fmt.Println(csvElements)
+		//		fmt.Printf("Checking for record with Date: %s\n", csvElements[0])
 
-		rows, err := db.Query("SELECT * FROM rate WHERE date like ?",  csvElements[0])
+		rows, err := db.Query("SELECT * FROM rate WHERE date like ?", csvElements[0])
 		if err != nil {
-		 	return err
+			return err
 		}
 		for rows.Next() {
 			if err := rows.Scan(&rate.ID, &rate.Date, &rate.one_month, &rate.one_5month, &rate.two_month, &rate.three_month, &rate.four_month, &rate.six_month, &rate.one_year, &rate.two_year, &rate.three_year, &rate.five_year, &rate.seven_year, &rate.ten_year, &rate.twenty_year, &rate.thirty_year); err != nil {
@@ -308,7 +322,7 @@ func addNewRatesFromBaseTime() {
 	for i := 0; i < len(years); i = i + 1 {
 		newLines := []string{}
 		s := fmt.Sprintf("https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/%s/all?type=daily_treasury_yield_curve&field_tdr_date_value=%s&page&_format=csv", years[i], years[i])
-//		fmt.Println(s)
+		//		fmt.Println(s)
 		resp, err := http.Get(s)
 		if err != nil {
 			panic(err)
@@ -318,7 +332,7 @@ func addNewRatesFromBaseTime() {
 		scanner := bufio.NewScanner(resp.Body)
 		for scanner.Scan() {
 			line := scanner.Text()
-//			fmt.Println(line)
+			//			fmt.Println(line)
 			newLines = append(newLines, line)
 		}
 
@@ -334,9 +348,9 @@ func addNewRatesFromBaseTime() {
 		// from year to year and sometimes even in the middle of the year.
 		csvColumns := strings.Split(newLines[0], ",")
 		reversedLines := reverseStringArray(newLines)
-		newRateLines := reversedLines[:len(reversedLines) - 1]
-//		fmt.Println(csvColumns)
-//		fmt.Println(newRateLines[0])
+		newRateLines := reversedLines[:len(reversedLines)-1]
+		//		fmt.Println(csvColumns)
+		//		fmt.Println(newRateLines[0])
 		addNewRates(newRateLines, csvColumns)
 	}
 }
@@ -366,14 +380,13 @@ func updateRateTable() {
 		return
 	}
 
-
 	// The Treasury delivers the CSV lines from highest to lowest date
 	// Reverse them and save the first line, which is the CVS header fields
 	// for use in the record insertion, where the header fields change
 	// from year to year and sometimes even in the middle of the year.
 	csvColumns := strings.Split(newLines[0], ",")
 	reversedLines := reverseStringArray(newLines)
-	newRateLines := reversedLines[:len(reversedLines) - 1]
+	newRateLines := reversedLines[:len(reversedLines)-1]
 	addNewRates(newRateLines, csvColumns)
 }
 
@@ -417,5 +430,6 @@ func main() {
 	router := gin.Default()
 	router.GET("/rates", rateGetAll)
 	router.GET("/rates/:id", getRateByID)
+	router.GET("/rateDate/:date", getRateByDate)
 	router.Run("localhost:8080")
 }
