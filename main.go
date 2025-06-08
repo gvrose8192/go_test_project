@@ -61,13 +61,19 @@ func getAllRates() ([]Rate, error) {
 
 func rateGetAll(c *gin.Context) {
 	var rates []Rate
+	rateStrings := []string{}
 
 	// Get everything - queries can pick and choose later
 	rates, err := getAllRates()
 	if err != nil {
 		return
 	}
-	c.IndentedJSON(http.StatusOK, rates)
+
+	for i := 0; i < len(rates); i = i + 1 {
+		s := fmt.Sprintf("%d %s %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f",  rates[i].ID, rates[i].Date, rates[i].one_month, rates[i].one_5month, rates[i].two_month,  rates[i].three_month, rates[i].four_month, rates[i].six_month, rates[i].one_year, rates[i].two_year, rates[i].three_year, rates[i].five_year, rates[i].seven_year, rates[i].ten_year, rates[i].twenty_year, rates[i].thirty_year)
+		rateStrings = append(rateStrings, s)
+	}
+	c.IndentedJSON(http.StatusOK, rateStrings)
 }
 
 func rateByDate(date string) ([]Rate, error) {
@@ -103,27 +109,30 @@ func getRateByDate(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	c.IndentedJSON(http.StatusOK, rates)
+
+	i := 0
+	s := fmt.Sprintf("{%d %s %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f}",  rates[i].ID, rates[i].Date, rates[i].one_month, rates[i].one_5month, rates[i].two_month,  rates[i].three_month, rates[i].four_month, rates[i].six_month, rates[i].one_year, rates[i].two_year, rates[i].three_year, rates[i].five_year, rates[i].seven_year, rates[i].ten_year, rates[i].twenty_year, rates[i].thirty_year)
+	c.IndentedJSON(http.StatusOK, s)
 }
 
 // rateByID queries for the daily rate with the specified ID.
-func rateByID(id int64) (Rate, error) {
+func rateByID(id int64) (string, error) {
 	// A rate to hold data from the returned row.
 	var rate Rate
 
 	row := db.QueryRow("SELECT * FROM rate WHERE id = ?", id)
 	if err := row.Scan(&rate.ID, &rate.Date, &rate.one_month, &rate.one_5month, &rate.two_month, &rate.three_month, &rate.four_month, &rate.six_month, &rate.one_year, &rate.two_year, &rate.three_year, &rate.five_year, &rate.seven_year, &rate.ten_year, &rate.twenty_year, &rate.thirty_year); err != nil {
 		if err == sql.ErrNoRows {
-			return rate, fmt.Errorf("rateById %d: no such album", id)
+			return "", fmt.Errorf("rateById %d: no such album", id)
 		}
-		return rate, fmt.Errorf("rateById %d: %v", id, err)
+		return "", fmt.Errorf("rateById %d: %v", id, err)
 	}
-	return rate, nil
+	s := fmt.Sprintf("{%d %s %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f}",  rate.ID, rate.Date, rate.one_month, rate.one_5month, rate.two_month,  rate.three_month, rate.four_month, rate.six_month, rate.one_year, rate.two_year, rate.three_year, rate.five_year, rate.seven_year, rate.ten_year, rate.twenty_year, rate.thirty_year)
+	return s, nil
 }
 
 func getRateByID(c *gin.Context) {
 	string_id := c.Param("id")
-	var rate Rate
 
 	// Get the id
 	id, err := strconv.ParseInt(string_id, 10, 64)
