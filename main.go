@@ -413,7 +413,7 @@ func main() {
 	cfg.User = *username
 	cfg.Passwd = *password
 	cfg.Net = "tcp"
-	cfg.Addr = "127.0.0.1:3306"
+	cfg.Addr = "0.0.0.0:3306"
 	cfg.DBName = "treasury_rate"
 
 	// Get a database handle.
@@ -440,5 +440,5 @@ func main() {
 	router.GET("/rates", rateGetAll)
 	router.GET("/rates/:id", getRateByID)
 	router.GET("/rateDate/:date", getRateByDate)
-	router.Run("localhost:8080")
+	router.Run("0.0.0.0:8080")
 }
