@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-sql-driver/mysql"
@@ -408,12 +409,14 @@ func main() {
 
 	flag.Parse()
 
+	host_port := os.Getenv("SQL_HOST_PORT")
+
 	// Capture connection properties.
 	cfg := mysql.NewConfig()
 	cfg.User = *username
 	cfg.Passwd = *password
 	cfg.Net = "tcp"
-	cfg.Addr = "0.0.0.0:3306"
+	cfg.Addr = host_port
 	cfg.DBName = "treasury_rate"
 
 	// Get a database handle.
