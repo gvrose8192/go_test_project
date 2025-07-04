@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: treasury-one
+  labels:
+    system: secondary
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      system: secondary
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        system: secondary
+    spec:
+      containers:
+      - name: golang
+        image: arm64v8/golang:tip-bullseye	# Pick your arch
+        env:
+        - name: SQL_HOST_PORT
+          value: "x.x.x.x:3306"	# env variable SQL_HOST_PORT example: "10.10.10.10:3306".  Your mysql server IP.
+        command: [ "/bin/bash","-c" ]
+# Fill in your mysql username and password
+        args: [ "git clone https://github.com/gvrose8192/go_test_project.git src/web-sql-query && cd src/web-sql-query && go run . -username <mysql username> -password <mysql password>"  ]
+        imagePullPolicy: Always
+        name: golang
+        ports:
+        - containerPort: 8080
+          protocol: TCP
