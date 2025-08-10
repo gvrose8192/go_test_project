@@ -440,8 +440,11 @@ func main() {
 	}
 
 	router := gin.Default()
+	// curl http://<ip address>:<port>/rates
 	router.GET("/rates", rateGetAll)
+	// curl http://<ip address>:<port>/rates/<id>
 	router.GET("/rates/:id", getRateByID)
+	// curl http://<ip address>:<port>/rateDate/<mm-dd-yyyy>
 	router.GET("/rateDate/:date", getRateByDate)
 	router.Run("0.0.0.0:8080")
 }
