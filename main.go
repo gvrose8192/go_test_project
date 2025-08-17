@@ -400,6 +400,10 @@ func updateRateTable() {
 	addNewRates(newRateLines, csvColumns)
 }
 
+func updateRates(c *gin.Context) {
+	updateRateTable()
+}
+
 func main() {
 	// Let's get started
 	username := flag.String("username", "your name", "a string")
@@ -446,5 +450,7 @@ func main() {
 	router.GET("/rates/:id", getRateByID)
 	// curl http://<ip address>:<port>/rateDate/<mm-dd-yyyy>
 	router.GET("/rateDate/:date", getRateByDate)
+	// curl -X POST http://<ip address>:<port>/updateRates
+	router.POST("/updateRates", updateRates)
 	router.Run("0.0.0.0:8080")
 }
