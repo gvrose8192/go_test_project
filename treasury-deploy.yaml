@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: golang
-        image: arm64v8/golang:tip-bullseye	# Pick your arch
+        image: golang:latest
         env:
         - name: SQL_HOST_PORT
           value: "x.x.x.x:3306"	# env variable SQL_HOST_PORT example: "10.10.10.10:3306".  Your mysql server IP.
